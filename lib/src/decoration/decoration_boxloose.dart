@@ -1,5 +1,6 @@
 part of 'pin_decoration.dart';
 
+
 /// The object determine the box stroke etc.
 class BoxLooseDecoration extends PinDecoration
     with CursorPaint
@@ -22,6 +23,8 @@ class BoxLooseDecoration extends PinDecoration
   /// The background color of index character.
   final ColorBuilder bgColorBuilder;
 
+  final Color bgColor;
+
   const BoxLooseDecoration({
     TextStyle textStyle,
     ObscureStyle obscureStyle,
@@ -35,6 +38,7 @@ class BoxLooseDecoration extends PinDecoration
     this.gapSpaces,
     @required this.strokeColorBuilder,
     this.bgColorBuilder,
+    this.bgColor,
   })  : assert(strokeColorBuilder != null),
         super(
           textStyle: textStyle,
@@ -71,6 +75,7 @@ class BoxLooseDecoration extends PinDecoration
       radius: this.radius,
       gapSpace: this.gapSpace,
       gapSpaces: this.gapSpaces,
+      bgColor: this.bgColor,
       bgColorBuilder: this.bgColorBuilder,
     );
   }
@@ -127,6 +132,13 @@ class BoxLooseDecoration extends PinDecoration
         ..isAntiAlias = true;
     }
 
+    Paint basePaint = null;
+    if (this.bgColor != null)
+      basePaint = Paint()
+        ..style = PaintingStyle.fill
+        ..isAntiAlias = true
+        ..color = this.bgColor;
+
     /// Draw the each rect of pin.
     for (int i = 0; i < pinLength; i++) {
       if (errorText != null && errorText.isNotEmpty) {
@@ -135,6 +147,16 @@ class BoxLooseDecoration extends PinDecoration
         borderPaint.color = errorTextStyle.color;
       } else {
         borderPaint.color = strokeColorBuilder.indexProperty(i);
+      }
+
+      if (basePaint != null) {
+        Rect rRectBase = Rect.fromLTRB(
+              startX-gapSpace,
+              0,
+              startX + singleWidth + strokeWidth*2 + gapSpace,
+              startY + strokeWidth,
+            );
+        canvas.drawRect(rRectBase, basePaint);
       }
       RRect rRect = RRect.fromRectAndRadius(
           Rect.fromLTRB(
@@ -145,6 +167,7 @@ class BoxLooseDecoration extends PinDecoration
           ),
           radius);
       canvas.drawRRect(rRect, borderPaint);
+      // canvas.drawCircle(Offset(startX + (singleWidth + strokeWidth)/2, (startY+strokeWidth)/2), (startY+strokeWidth)/2, borderPaint);
       if (insidePaint != null) {
         canvas.drawRRect(
             RRect.fromRectAndRadius(
